@@ -42,6 +42,34 @@ export const featureHighlights = [
   },
 ];
 
+/**
+ * Editorial three-pillar copy used by the section directly under the hero.
+ * Intentionally short — single-verb labels and one-sentence descriptions —
+ * so the section reads as a quick statement of capability, not a feature
+ * dump. Detail goes in the FeatureSections section further down the page.
+ */
+export const evidencePillars = {
+  eyebrow: "How it works",
+  heading: "Three layers of crawl intelligence — connected end to end.",
+  pillars: [
+    {
+      index: "01",
+      label: "Capture",
+      body: "Render JavaScript, extract HTML, metadata, links, and headings — every page becomes structured evidence.",
+    },
+    {
+      index: "02",
+      label: "Connect",
+      body: "Embed pages to surface semantic relationships, internal overlap, and the gaps weakening the site.",
+    },
+    {
+      index: "03",
+      label: "Investigate",
+      body: "Agents work the crawl directly — comparing groups, surfacing patterns, drafting audits and strategy.",
+    },
+  ],
+} as const;
+
 export const workflowSteps = [
   "Crawl rendered pages and collect the SEO fields that matter",
   "Build semantic maps, entities, evidence, and page-level context",

@@ -218,6 +218,67 @@ body {
   animation-delay: var(--pb-delay, 0ms);
 }
 
+/*
+ * "Generated text" effect — used by the description section that sits between
+ * the hero and the feature spotlights. Words start invisible and fade in one
+ * at a time with a small upward drift; together they read as an LLM streaming
+ * tokens. Activation is gated by [data-pb-generating] which is added by an
+ * IntersectionObserver, so the effect plays the first time the section enters
+ * view and never plays at scroll-past speed.
+ *
+ *   `.pb-gen-word` carries the per-word inline animation-delay
+ *   `.pb-gen-cursor` is the trailing block cursor that blinks during streaming
+ *   `.pb-gen-cursor[data-done="true"]` fades the cursor out at completion
+ */
+.pb-gen-word {
+  opacity: 0;
+  display: inline-block;
+  filter: blur(8px);
+  /* The word starts hidden + heavily blurred. Animation clears both,
+   * giving the recognisable Aceternity-style "AI is generating" look.
+   * No translate — pure blur+opacity feels smoother for centered
+   * typography because nothing competes with the word's vertical position. */
+}
+
+[data-pb-generating="true"] .pb-gen-word {
+  animation: pb-gen-word 720ms cubic-bezier(0.22, 0.7, 0.2, 1) forwards;
+  animation-delay: var(--pb-word-delay, 0ms);
+}
+
+@keyframes pb-gen-word {
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.pb-gen-cursor {
+  display: inline-block;
+  width: 0.45em;
+  height: 1em;
+  vertical-align: -0.12em;
+  margin-left: 0.06em;
+  background: hsl(var(--pb-accent-strong));
+  border-radius: 1px;
+  animation: pb-gen-cursor 1.05s steps(2, end) infinite;
+  transition: opacity 360ms ease;
+}
+
+.pb-gen-cursor[data-done="true"] {
+  opacity: 0;
+}
+
+@keyframes pb-gen-cursor {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -238,5 +299,15 @@ body {
   .pb-hero-halo {
     animation: none !important;
     transform: none !important;
+  }
+
+  .pb-gen-word {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .pb-gen-cursor {
+    display: none !important;
   }
 }

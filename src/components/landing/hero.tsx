@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { screenshots } from "./assets";
-import { heroCopy } from "./content";
+import { evidencePillars, heroCopy } from "./content";
 
 /**
  * PageBrain hero — full-bleed midnight poster with one dominant idea:
@@ -16,7 +16,7 @@ import { heroCopy } from "./content";
  */
 export function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-[hsl(var(--pb-canvas))]">
+    <section className="relative isolate overflow-hidden bg-[hsl(var(--pb-canvas))] pb-2 sm:pb-4 lg:pb-6">
       <BackgroundLayers />
 
       {/* Inner column — only the text/action stack is constrained. */}
@@ -71,6 +71,8 @@ export function Hero() {
       </div>
 
       <ProductShowcase />
+
+      <HeroHighlights />
     </section>
   );
 }
@@ -211,9 +213,27 @@ function WindowsGlyph({ className = "size-[12.5px]" }: { className?: string }) {
 }
 
 /**
- * The dominant visual anchor — full-width product still photographed at a
- * very slight tilt, framed with a faint accent line on top, and dissolving
- * into the next section via a long gradient.
+ * Product showcase — the dominant visual anchor of the hero.
+ *
+ * Three layered treatments compose the "lit screen in a dark room" feel:
+ *
+ *   1. Ambient screen bloom — a large, heavily-blurred azure radial pinned
+ *      behind the frame. The screen reads as if it's actually emitting light
+ *      into the air around it. This is the single biggest "designer move"
+ *      and is what separates a screenshot-in-a-box from product photography.
+ *
+ *   2. Glass-bezel shadow stack — the frame edge is built from five
+ *      composited shadow layers (top inset highlight, bottom inset depth,
+ *      outer hairline ring, deep drop shadow, accent rim glow) instead of a
+ *      single `border`, so the edge reads as a piece of glass.
+ *
+ *   3. Cinematic foot fade — the bottom edge of the frame dissolves into
+ *      the canvas via an overlay, suggesting the screen continues "down
+ *      into the surface" rather than ending in a hard line.
+ *
+ * The accent hairline above the frame remains, but is now narrower and
+ * brighter — it sits inside the bloom and reads as the lit upper edge of
+ * the screen rather than a decorative line.
  */
 function ProductShowcase() {
   return (
@@ -223,15 +243,46 @@ function ProductShowcase() {
       className="relative z-10 mt-12 sm:mt-14 lg:mt-16"
       id="product"
     >
-      {/* Edge-to-edge frame container — no shared max-width. */}
       <div className="relative mx-auto w-[min(1280px,94vw)]">
-        {/* Accent hairline running across the top of the frame. */}
-        <div className="absolute inset-x-12 -top-px h-px bg-[linear-gradient(90deg,transparent,hsl(var(--pb-accent)/0.55)_50%,transparent)]" />
+        {/*
+         * (1) Ambient screen bloom. Two stacked radials at different scales
+         * give the bloom a warm core and a wider cool falloff. `filter: blur`
+         * is applied via inline style so it composites cleanly with the
+         * radial — Tailwind's `blur-*` utilities use the wrong filter order
+         * for this composition.
+         */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 -m-24 rounded-[80px] sm:-m-28 lg:-m-32"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 55% at 50% 40%, hsl(var(--pb-accent-glow) / 0.34), transparent 65%), radial-gradient(ellipse 90% 80% at 50% 50%, hsl(220 60% 35% / 0.28), transparent 75%)",
+            filter: "blur(60px)",
+          }}
+        />
 
-        {/* The screenshot already includes the desktop app's own titlebar
-            (traffic-light dots, date, page count). The frame's aspect ratio
-            matches the source image (2880×1698) so nothing gets cropped. */}
-        <div className="relative aspect-[2880/1698] w-full overflow-hidden rounded-2xl border border-[hsl(var(--pb-border-strong))] bg-[hsl(var(--pb-graphite))] shadow-[0_60px_140px_-50px_rgba(0,0,0,0.95),0_0_0_1px_hsl(var(--pb-foreground)/0.04)_inset]">
+        {/* Lit upper-edge hairline — the bright top of the "screen". */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-20 -top-px z-10 h-px bg-[linear-gradient(90deg,transparent,hsl(var(--pb-accent-strong)/0.85)_50%,transparent)]"
+        />
+
+        {/*
+         * (2) The frame itself. The `shadow-` stack composes (in z-order
+         * from deepest to nearest):
+         *   - 0 60px 140px -50px black           : depth into space
+         *   - 0 30px 80px  -40px accent-glow/22% : the screen casting light
+         *   - 0 0 0 1px border-strong            : actual hairline edge
+         *   - inset 0 1px 0 white/8%             : top glass highlight
+         *   - inset 0 -1px 0 black/40%           : bottom glass shadow
+         */}
+        <div
+          className="relative aspect-[2880/1698] w-full overflow-hidden rounded-[20px] bg-[hsl(var(--pb-graphite))]"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 hsl(0 0% 100% / 0.08), inset 0 -1px 0 hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(var(--pb-border-strong)), 0 30px 80px -40px hsl(var(--pb-accent-glow) / 0.22), 0 60px 140px -50px rgba(0, 0, 0, 0.95)",
+          }}
+        >
           <Image
             src={screenshots.tableAgent}
             alt="PageBrain workspace showing a crawl table for cursor.com alongside the Crawl Agent panel drafting an SEO strategy."
@@ -240,11 +291,154 @@ function ProductShowcase() {
             sizes="(min-width: 1280px) 1280px, 94vw"
             className="object-contain"
           />
-        </div>
 
-        {/* Soft reflection that fades the bottom edge into the canvas. */}
-        <div className="pointer-events-none absolute inset-x-0 -bottom-2 h-32 bg-[linear-gradient(180deg,transparent,hsl(var(--pb-canvas)))]" />
+          {/* (3) Cinematic foot fade — a soft kiss at the bottom edge that
+              suggests depth without swallowing real product content. Sits
+              inside the frame so the bezel line stays crisp on the sides. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[12%] bg-[linear-gradient(180deg,transparent,hsl(var(--pb-canvas)/0.85))]"
+          />
+        </div>
       </div>
     </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* HeroHighlights                                                             */
+/*                                                                            */
+/*   Three feature blurbs that sit directly under the product showcase,       */
+/*   sharing the same max-width lane so they read as part of the hero, not    */
+/*   a separate section. Each blurb is just an icon + tight title + a         */
+/*   short description — the only chrome is a single top hairline running     */
+/*   across the row and thin vertical dividers between columns.               */
+/*                                                                            */
+/*   Layout details:                                                          */
+/*     - Same `w-[min(1280px,94vw)]` lane as ProductShowcase                  */
+/*     - 3 columns at sm+, stacked at mobile                                  */
+/*     - mt-8/10 gives the trio a tight visual link to the screenshot         */
+/*     - Animation reuses `data-pb-rise` so the trio rises in after the       */
+/*       product image lands                                                  */
+/* -------------------------------------------------------------------------- */
+
+const pillarIcons = [CaptureIcon, ConnectIcon, InvestigateIcon] as const;
+
+function HeroHighlights() {
+  return (
+    <div
+      data-pb-rise
+      style={{ ["--pb-delay" as string]: "640ms" }}
+      className="relative z-10 mx-auto mt-5 w-[min(1280px,94vw)] sm:mt-6 lg:mt-8"
+    >
+      {/* Top hairline — the only horizontal chrome on the trio. Picks up the
+          accent on the leftmost edge so it visually echoes the lit upper edge
+          of the product frame above it. */}
+      <div
+        aria-hidden="true"
+        className="h-px w-full bg-[linear-gradient(90deg,hsl(var(--pb-accent)/0.35),hsl(var(--pb-border-strong))_25%,hsl(var(--pb-border-strong))_75%,hsl(var(--pb-accent)/0.2))]"
+      />
+
+      <ol
+        role="list"
+        className="grid grid-cols-1 sm:grid-cols-3"
+      >
+        {evidencePillars.pillars.map((pillar, i) => {
+          const Icon = pillarIcons[i] ?? CaptureIcon;
+          const isFirst = i === 0;
+          const isLast = i === evidencePillars.pillars.length - 1;
+
+          return (
+            <li
+              key={pillar.label}
+              className={[
+                "py-5 sm:py-6",
+                "sm:px-6",
+                isFirst ? "sm:pl-0" : "",
+                isLast ? "sm:pr-0" : "",
+                isLast
+                  ? ""
+                  : "sm:border-r sm:border-[hsl(var(--pb-border)/0.45)]",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <div className="flex items-center gap-2.5">
+                <Icon className="size-[14px] text-[hsl(var(--pb-storm))]" />
+                <h3 className="text-[13px] font-semibold tracking-[-0.005em] text-[hsl(var(--pb-foreground-strong))]">
+                  {pillar.label}
+                </h3>
+              </div>
+              <p className="mt-1.5 text-[12.5px] leading-[1.55] text-[hsl(var(--pb-storm))]">
+                {pillar.body}
+              </p>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+/* --- Pillar icons — 16px viewbox, 1.4px stroke, currentColor ------------- */
+
+function CaptureIcon({ className = "" }: { className?: string }) {
+  // A page outline with a folded corner + a couple of content lines —
+  // reads as "we capture the page".
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3.5 2.25h6L13 5.25v8.25a.75.75 0 0 1-.75.75H3.5a.75.75 0 0 1-.75-.75V3a.75.75 0 0 1 .75-.75Z" />
+      <path d="M9.5 2.25v3h3" />
+      <path d="M5.25 8.5h5.5M5.25 11h3.5" />
+    </svg>
+  );
+}
+
+function ConnectIcon({ className = "" }: { className?: string }) {
+  // Three nodes connected by lines — the "graph" of semantic relationships.
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4.6 5.1 7 7M11.4 5.1 9 7M8 9.4v2.6" />
+      <circle cx="3.5" cy="4" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="12.5" cy="4" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="8" cy="12.5" r="1.4" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function InvestigateIcon({ className = "" }: { className?: string }) {
+  // A four-pointed sparkle — the agent / investigation mark. Slightly more
+  // distinctive than a magnifier and fits the "AI works the crawl" framing.
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 2v3.2M8 10.8V14M2 8h3.2M10.8 8H14M4 4l2.2 2.2M9.8 9.8 12 12M4 12l2.2-2.2M9.8 6.2 12 4" />
+    </svg>
   );
 }
