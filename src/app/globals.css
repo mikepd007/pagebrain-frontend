@@ -1,26 +1,242 @@
 @import "tailwindcss";
 
+/*
+ * PageBrain — design tokens
+ * Linear-inspired midnight surface system with a single electric-azure accent.
+ * Layered surfaces (canvas → graphite → slate) build depth without contrast noise.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --pb-canvas: 220 14% 4%;
+  --pb-canvas-2: 220 14% 5.5%;
+  --pb-graphite: 220 12% 7%;
+  --pb-slate: 220 11% 9.5%;
+  --pb-overlay: 220 11% 13%;
+  --pb-border: 220 10% 16%;
+  --pb-border-strong: 220 10% 22%;
+  --pb-border-hover: 220 10% 30%;
+  --pb-foreground: 210 16% 97%;
+  --pb-foreground-strong: 0 0% 100%;
+  --pb-light-steel: 216 16% 84%;
+  --pb-storm: 218 8% 60%;
+  --pb-fog: 220 7% 42%;
+  --pb-muted: 220 9% 15%;
+  --pb-muted-foreground: 218 8% 56%;
+
+  /*
+   * Brand accent — PageBrain electric azure. Mirrors the desktop app's
+   * `--primary` token (205 85% 60%) so web and product feel like one system.
+   * Used surgically for primary action, focus rings, and a single focal glow.
+   * NOTE: pink (`--accent-pink` in the desktop) is reserved for the
+   * Compare Workspace feature only — never for primary brand moments here.
+   */
+  --pb-accent: 205 85% 60%;
+  --pb-accent-strong: 205 85% 68%;
+  --pb-accent-glow: 205 90% 54%;
+  --pb-accent-foreground: 217 14% 6%;
+
+  /* Status (kept calm — never used decoratively) */
+  --pb-success: 156 65% 55%;
+  --pb-warning: 42 94% 64%;
+  --pb-info: 205 85% 64%;
+
+  --background: hsl(var(--pb-canvas));
+  --foreground: hsl(var(--pb-foreground));
+
+  --font-pb-sans: var(--font-pb-inter), Inter, ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-pb-mono: var(--font-pb-mono-stack), "JetBrains Mono", "SFMono-Regular",
+    Consolas, "Liberation Mono", monospace;
+
+  --pb-shadow-subtle: 0 0 0 1px hsl(var(--pb-border) / 0.6);
+  --pb-shadow-elevated: 0 30px 80px -40px rgba(0, 0, 0, 0.85),
+    0 0 0 1px hsl(var(--pb-border) / 0.55);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-pb-sans);
+  --font-mono: var(--font-pb-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: hsl(var(--pb-canvas));
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: hsl(var(--pb-canvas));
+  color: hsl(var(--pb-foreground));
+  font-family: var(--font-pb-sans);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: hsl(var(--pb-accent) / 0.85);
+  color: hsl(var(--pb-accent-foreground));
+}
+
+/*
+ * Hero background system — designed to feel atmospheric, not decorative.
+ * Three independent layers compose the look; each one does one job and
+ * passes light to the layer above it. None of them should be louder than
+ * the headline.
+ *
+ *  Layer 1 — `.pb-hero-halo`     : four-band atmospheric haze (canvas mood)
+ *  Layer 2 — `.pb-hero-horizon`  : a single thin lit line near the headline
+ *  Layer 3 — `.pb-hero-grain`    : 1.5% SVG film grain to kill gradient banding
+ *
+ * The halo also breathes (~14s) on a sin-curve opacity drift so the page
+ * never feels like a static image. Motion is removed under reduced-motion.
+ */
+
+/*
+ * Halo — four stacked gradients, deliberately ordered:
+ *  (1) ultra-wide ambient cool wash (top)            — sets the mood
+ *  (2) focused azure plume behind the eyebrow/headline — the "light source"
+ *  (3) tighter inner highlight                       — gives the plume a hot core
+ *  (4) cool exhaust glow toward the bottom of the section — anchors the depth
+ * Background-blend-mode: screen on the inner highlight keeps it from looking
+ * pasted on by letting the hot core add light to (2) instead of stacking on it.
+ */
+.pb-hero-halo {
+  background:
+    radial-gradient(
+      ellipse 90% 55% at 50% -8%,
+      hsl(220 50% 30% / 0.22),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 48% 32% at 50% 6%,
+      hsl(var(--pb-accent-glow) / 0.28),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 22% 16% at 50% 4%,
+      hsl(var(--pb-accent-strong) / 0.18),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 70% 30% at 50% 92%,
+      hsl(var(--pb-accent-glow) / 0.05),
+      transparent 70%
+    );
+  animation: pb-halo-breathe 14s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+/*
+ * Horizon — a single hairline of light running through the headline area.
+ * Built as a horizontally-aligned linear gradient in a tall, thin element
+ * so it reads as a luminous edge, not a stripe. The blur softens it to glass.
+ */
+.pb-hero-horizon {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--pb-accent-glow) / 0.24) 32%,
+    hsl(var(--pb-accent-strong) / 0.55) 50%,
+    hsl(var(--pb-accent-glow) / 0.24) 68%,
+    transparent 100%
+  );
+  filter: blur(1.5px);
+}
+
+/*
+ * Film grain — inline SVG fractalNoise with stitchTiles for a seamless tile.
+ * `mix-blend-mode: overlay` makes mid-tones do most of the texturing while
+ * keeping pure black and pure white untouched, so deep shadows stay clean.
+ * The 1.6% opacity is the line between "you don't notice it" and
+ * "the gradient looks plasticky without it" — please don't crank it.
+ */
+.pb-hero-grain {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+  opacity: 0.016;
+  mix-blend-mode: overlay;
+}
+
+/*
+ * Halo breath — micro opacity + scale drift over 14s.
+ * The numbers are deliberate: 0.86→1→0.86 keeps the floor visible enough
+ * that the absence of motion under prefers-reduced-motion still feels lit.
+ */
+@keyframes pb-halo-breathe {
+  0%, 100% {
+    opacity: 0.86;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.012);
+  }
+}
+
+/* Hero entrance — used by [data-pb-rise] elements with optional --pb-delay. */
+@keyframes pb-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+[data-pb-rise] {
+  opacity: 0;
+  animation: pb-rise 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--pb-delay, 0ms);
+}
+
+/* Slight scroll-linked float for the product visual. */
+@keyframes pb-float-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 36px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+[data-pb-float] {
+  opacity: 0;
+  animation: pb-float-up 1100ms cubic-bezier(0.22, 0.65, 0.2, 1) both;
+  animation-delay: var(--pb-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+
+  [data-pb-rise],
+  [data-pb-float] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .pb-hero-halo {
+    animation: none !important;
+    transform: none !important;
+  }
 }
