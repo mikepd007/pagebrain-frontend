@@ -72,7 +72,7 @@ export function FeatureSpotlights() {
   return (
     <section
       id="features"
-      className="relative bg-[hsl(var(--pb-canvas))] pb-24 sm:pb-32 lg:pb-40"
+      className="relative pb-24 sm:pb-32 lg:pb-40"
     >
       {/* Same lane as the hero (`w-[min(1280px,94vw)]`) so the entire page
           sits in a single rail — desktop's StartScreen does the same: one

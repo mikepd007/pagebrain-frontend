@@ -16,7 +16,7 @@ import { evidencePillars, heroCopy } from "./content";
  */
 export function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-[hsl(var(--pb-canvas))] pb-2 sm:pb-4 lg:pb-6">
+    <section className="relative isolate overflow-hidden pb-2 sm:pb-4 lg:pb-6">
       <BackgroundLayers />
 
       {/* Inner column — only the text/action stack is constrained. */}
@@ -102,8 +102,13 @@ function BackgroundLayers() {
           their smoothness, but below content (z-0). */}
       <div className="pb-hero-grain pointer-events-none absolute inset-x-0 top-0 z-0 h-[860px]" />
 
-      {/* Long bottom fade — dissolves the section cleanly into the next. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-72 bg-gradient-to-b from-transparent to-[hsl(var(--pb-canvas))]" />
+      {/*
+       * The hero used to paint a long opaque-canvas fade at the bottom to
+       * "dissolve" into the next section. Now that the body owns the
+       * canvas color and `<PageGuides />` runs vertical rails through the
+       * page, an opaque fade would punch a hole in the rails. The halo
+       * already trails off transparently at its 92% stop — that's enough.
+       */}
     </>
   );
 }

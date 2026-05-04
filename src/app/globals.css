@@ -255,6 +255,47 @@ body {
 }
 
 /*
+ * Page rails — architectural guidelines used by `<PageGuides />`.
+ *
+ * Each rail draws in once on mount: scaleY 0 → 1 from the top down,
+ * 1400ms, sharp ease-out. The combination of a long duration with a
+ * quick deceleration makes the rails feel like they're being inscribed
+ * onto the page rather than just appearing.
+ *
+ * `transform-origin: top` so the reveal feels gravitational (top to
+ * bottom), not from the middle out. `will-change: transform` keeps the
+ * paint clean — we know the rail will animate exactly once.
+ */
+.pb-rail-draw {
+  transform: scaleY(0);
+  transform-origin: top;
+  animation: pb-rail-draw 1400ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  will-change: transform;
+}
+
+@keyframes pb-rail-draw {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/*
+ * Corner marks fade in (no scale) after the rails finish drawing. They
+ * land as small architectural ticks at the four lane corners — the page
+ * reads "rails inscribe → corners click into place".
+ */
+.pb-rail-fade {
+  opacity: 0;
+  animation: pb-rail-fade 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes pb-rail-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+/*
  * "Generated text" effect — used by the description section that sits between
  * the hero and the feature spotlights. Words start invisible and fade in one
  * at a time with a gentle blur clear, together reading as an LLM streaming
@@ -306,5 +347,12 @@ body {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
+  }
+
+  .pb-rail-draw,
+  .pb-rail-fade {
+    transform: none !important;
+    opacity: 1 !important;
+    animation: none !important;
   }
 }

@@ -64,7 +64,7 @@ export function GeneratedDescription() {
 
   return (
     <section
-      className="relative bg-[hsl(var(--pb-canvas))]"
+      className="relative"
       aria-label="What PageBrain does"
     >
       <div
