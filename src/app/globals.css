@@ -1,40 +1,63 @@
 @import "tailwindcss";
 
 /*
- * PageBrain — design tokens
- * Linear-inspired midnight surface system with a single electric-azure accent.
- * Layered surfaces (canvas → graphite → slate) build depth without contrast noise.
+ * PageBrain marketing — design tokens
+ *
+ * Mirrors the desktop app's (`crawltable-desktop`) dark-mode token system
+ * so web and product feel like one continuous instrument. The desktop file
+ * lives at /src/renderer/styles/globals.css; the values below are kept in
+ * sync deliberately. If a token here drifts from the desktop, fix it here.
+ *
+ * Naming scheme: `--pb-*` to avoid clobbering anything else; the value
+ * triplets are HSL components ready for `hsl(var(--token) / opacity)`.
+ *
+ * Three principles inherited from the desktop:
+ *   1. Borders carry separation, not shadows.
+ *   2. The accent (electric azure) is RESERVED for links, focus, and
+ *      occasional emphasis — primary CTAs invert to `foreground` on
+ *      `background`, never accent fill.
+ *   3. Density is calm, not minimal. 11–13px chrome type, /20–/35 border
+ *      opacities, /[0.06]–/[0.16] hover backgrounds.
  */
 :root {
-  --pb-canvas: 220 14% 4%;
-  --pb-canvas-2: 220 14% 5.5%;
-  --pb-graphite: 220 12% 7%;
-  --pb-slate: 220 11% 9.5%;
-  --pb-overlay: 220 11% 13%;
-  --pb-border: 220 10% 16%;
+  /* Surfaces — direct port of desktop `.dark` */
+  --pb-canvas: 220 12% 8.5%;          /* desktop --background */
+  --pb-canvas-subtle: 220 12% 6.5%;   /* desktop --background-subtle */
+  --pb-elevated: 220 11% 11.2%;       /* desktop --elevated-surface */
+  --pb-card: 220 11% 10.2%;           /* desktop --card */
+  --pb-popover: 220 11% 10.6%;        /* desktop --popover */
+  --pb-muted: 220 9% 15.5%;           /* desktop --muted */
+
+  /* Borders — opacity-driven scale lifted from desktop */
+  --pb-border: 220 10% 15.5%;         /* desktop --border */
+  --pb-border-elevated: 220 10% 18%;  /* desktop --border-elevated */
+  --pb-border-hover: 220 9% 25%;      /* desktop --border-hover */
+  /* Legacy alias kept so older components still resolve cleanly. */
   --pb-border-strong: 220 10% 22%;
-  --pb-border-hover: 220 10% 30%;
-  --pb-foreground: 210 16% 97%;
+
+  /* Foreground scale — desktop dark */
+  --pb-foreground: 216 6% 94%;            /* desktop --foreground */
   --pb-foreground-strong: 0 0% 100%;
-  --pb-light-steel: 216 16% 84%;
-  --pb-storm: 218 8% 60%;
-  --pb-fog: 220 7% 42%;
-  --pb-muted: 220 9% 15%;
-  --pb-muted-foreground: 218 8% 56%;
+  --pb-foreground-code: 216 6% 87%;       /* desktop --foreground-code */
+  --pb-foreground-subtle: 216 8% 43%;     /* desktop --foreground-subtle */
+  --pb-muted-foreground: 216 8% 55%;      /* desktop --muted-foreground */
+  /* Legacy aliases used by hero / nav components. */
+  --pb-light-steel: 216 8% 84%;
+  --pb-storm: 216 8% 55%;
+  --pb-fog: 218 8% 42%;
 
   /*
-   * Brand accent — PageBrain electric azure. Mirrors the desktop app's
-   * `--primary` token (205 85% 60%) so web and product feel like one system.
-   * Used surgically for primary action, focus rings, and a single focal glow.
-   * NOTE: pink (`--accent-pink` in the desktop) is reserved for the
-   * Compare Workspace feature only — never for primary brand moments here.
+   * Accent — PageBrain electric azure.
+   * Identical HSL to desktop's `--primary` / `--primary-hover` in dark mode.
+   * Used surgically: focus rings, links, single focal glow on the hero.
+   * NEVER as primary CTA fill — primary CTAs invert (foreground on canvas).
    */
-  --pb-accent: 205 85% 60%;
-  --pb-accent-strong: 205 85% 68%;
+  --pb-accent: 205 85% 60%;            /* desktop --primary */
+  --pb-accent-strong: 205 85% 68%;     /* desktop --primary-hover */
   --pb-accent-glow: 205 90% 54%;
   --pb-accent-foreground: 217 14% 6%;
 
-  /* Status (kept calm — never used decoratively) */
+  /* Status — kept identical to desktop. Calm, never decorative. */
   --pb-success: 156 65% 55%;
   --pb-warning: 42 94% 64%;
   --pb-info: 205 85% 64%;
@@ -42,9 +65,14 @@
   --background: hsl(var(--pb-canvas));
   --foreground: hsl(var(--pb-foreground));
 
-  --font-pb-sans: var(--font-pb-inter), Inter, ui-sans-serif, system-ui,
+  /*
+   * Font stacks. Geist + Geist Mono — same fonts the desktop ships with —
+   * loaded by `geist/font/{sans,mono}` in layout.tsx, which produces the
+   * `--font-geist-sans` / `--font-geist-mono` CSS variables consumed below.
+   */
+  --font-pb-sans: var(--font-geist-sans), ui-sans-serif, system-ui,
     -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-pb-mono: var(--font-pb-mono-stack), "JetBrains Mono", "SFMono-Regular",
+  --font-pb-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular",
     Consolas, "Liberation Mono", monospace;
 
   --pb-shadow-subtle: 0 0 0 1px hsl(var(--pb-border) / 0.6);
@@ -69,12 +97,20 @@ html {
   color-scheme: dark;
 }
 
+/*
+ * Body baseline matches the desktop verbatim:
+ *   - Geist sans
+ *   - "rlig" 1, "calt" 1, "ss01" 1 OpenType features
+ *   - NO global letter-spacing override (the previous -0.011em was a
+ *     marketing-era choice that conflicted with the desktop's calmer
+ *     baseline; removed so type measures the same in both apps)
+ *   - Antialiased rendering
+ */
 body {
   background: hsl(var(--pb-canvas));
   color: hsl(var(--pb-foreground));
   font-family: var(--font-pb-sans);
-  font-feature-settings: "cv11", "ss01", "ss03";
-  letter-spacing: -0.011em;
+  font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -221,23 +257,15 @@ body {
 /*
  * "Generated text" effect — used by the description section that sits between
  * the hero and the feature spotlights. Words start invisible and fade in one
- * at a time with a small upward drift; together they read as an LLM streaming
+ * at a time with a gentle blur clear, together reading as an LLM streaming
  * tokens. Activation is gated by [data-pb-generating] which is added by an
  * IntersectionObserver, so the effect plays the first time the section enters
  * view and never plays at scroll-past speed.
- *
- *   `.pb-gen-word` carries the per-word inline animation-delay
- *   `.pb-gen-cursor` is the trailing block cursor that blinks during streaming
- *   `.pb-gen-cursor[data-done="true"]` fades the cursor out at completion
  */
 .pb-gen-word {
   opacity: 0;
   display: inline-block;
   filter: blur(8px);
-  /* The word starts hidden + heavily blurred. Animation clears both,
-   * giving the recognisable Aceternity-style "AI is generating" look.
-   * No translate — pure blur+opacity feels smoother for centered
-   * typography because nothing competes with the word's vertical position. */
 }
 
 [data-pb-generating="true"] .pb-gen-word {
@@ -249,33 +277,6 @@ body {
   to {
     opacity: 1;
     filter: blur(0);
-  }
-}
-
-.pb-gen-cursor {
-  display: inline-block;
-  width: 0.45em;
-  height: 1em;
-  vertical-align: -0.12em;
-  margin-left: 0.06em;
-  background: hsl(var(--pb-accent-strong));
-  border-radius: 1px;
-  animation: pb-gen-cursor 1.05s steps(2, end) infinite;
-  transition: opacity 360ms ease;
-}
-
-.pb-gen-cursor[data-done="true"] {
-  opacity: 0;
-}
-
-@keyframes pb-gen-cursor {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
   }
 }
 
@@ -305,9 +306,5 @@ body {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
-  }
-
-  .pb-gen-cursor {
-    display: none !important;
   }
 }

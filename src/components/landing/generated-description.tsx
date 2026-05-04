@@ -3,26 +3,25 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 /**
- * GeneratedDescription
+ * GeneratedDescription — "in one paragraph", desktop-calm.
  *
- * A single clean paragraph that explains the product, streamed in token by
- * token like an LLM is generating it (Aceternity "text generate effect"
- * feel — opacity 0 → 1 with an 8px blur clearing to 0, ~70ms stagger).
+ * Strips back to what the desktop StartScreen does: a single quiet
+ * paragraph centered on the canvas, no horizontal rules, no monogram
+ * kicker, no glowing end-mark. The only animated chrome is the word-by-
+ * word blur clear that signals "an LLM wrote this" — a direct echo of
+ * the streamdown rendering used by the AgentChat in product.
  *
- * Design notes:
- *  - One paragraph. No paragraph breaks, no manual line breaks. The text
- *    wraps naturally inside a constrained max-width (~640px) so it reads
- *    as a tight calm explainer, not a manifesto.
- *  - Smaller type than display copy. This sits between the loud hero and
- *    the feature spotlights and shouldn't compete with either — it's a
- *    quiet confident sentence, not a headline.
- *  - No trailing cursor. Stream finishes and the paragraph just sits there.
- *  - IntersectionObserver gates the animation so it only fires the first
- *    time the section enters view, never during a fast scroll-past.
+ * Why so plain on purpose:
+ *   - The desktop app builds trust through restraint. No marketing chrome
+ *     ever appears in the workspace; every pixel does product work.
+ *   - This bridge between hero and features is "the product talking to
+ *     you" — it should feel like a sentence the agent itself wrote, not
+ *     a campaign poster. Instrument-like, not eventful.
+ *   - Removing the mono kicker + accent dot means the only color in the
+ *     whole block is the foreground type — which is exactly how the
+ *     desktop's empty-state copy reads.
  */
 
-// One clean paragraph. Three sentences joined with ordinary punctuation —
-// no paragraph breaks, no <br>s. This is the entire content.
 const PARAGRAPH =
   "PageBrain is the semantic scraping tool for SEOs in the era of AI — built for AIO, AI Overviews, and the new shape of search. It renders modern sites, maps meaning across every page, and turns crawl evidence into audits, strategy, and a clear path forward. The tool that makes you an expert in AI SEO.";
 
@@ -35,8 +34,6 @@ export function GeneratedDescription() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const [generating, setGenerating] = useState(false);
 
-  // Pre-compute per-word delays once. Plain split/map — there is only one
-  // paragraph so no nested traversal is needed.
   const words = useMemo(
     () =>
       PARAGRAPH.split(/\s+/).map((word, i) => ({
@@ -75,7 +72,13 @@ export function GeneratedDescription() {
         data-pb-generating={generating ? "true" : "false"}
         className="mx-auto flex w-full max-w-[820px] flex-col items-center px-6 py-12 text-center sm:py-16 lg:py-20"
       >
-        <p className="text-balance font-sans text-[17px] font-medium leading-[1.55] tracking-[-0.012em] text-[hsl(var(--pb-foreground)/0.92)] sm:text-[19px] sm:leading-[1.55] lg:text-[21px] lg:leading-[1.55]">
+        {/*
+         * Type sized to read as quiet editorial body, not a headline.
+         * `text-foreground/85` matches the desktop's typical prose color
+         * (assistant message body, panel copy). `text-balance` keeps the
+         * line endings natural rather than ragged.
+         */}
+        <p className="text-balance font-sans text-[16px] font-normal leading-[1.6] text-[hsl(var(--pb-foreground)/0.85)] sm:text-[18px] sm:leading-[1.6] lg:text-[20px] lg:leading-[1.55]">
           {words.map(({ word, delay }, wIdx) => {
             const isLast = wIdx === words.length - 1;
             return (
